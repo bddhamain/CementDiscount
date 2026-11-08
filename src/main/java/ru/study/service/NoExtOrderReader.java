@@ -5,10 +5,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 
-public class JsonOrderReader {
+public class NoExtOrderReader {
     private final Path file;
 
-    public JsonOrderReader(Path file) {
+    public NoExtOrderReader(Path file) {
         this.file = file;
     }
 

@@ -7,18 +7,18 @@ import java.util.stream.Collectors;
 
 public class OrdersProcessor {
 
-    /** Sorts orders by orderTime (earliest first). */
+    //Sorts orders by orderTime (earliest first)
     public List<Order> process(List<Order> orders) {
         return orders.stream()
-                .sorted(Comparator.comparing(order -> order.orderTime))
+                .sorted(Comparator.comparing(order -> order.getOrderTime()))
                 .toList();
     }
 
-    /** Assigns queue positions and discounts, based on the order's position in the list. */
+    // Assigns queue positions, discounts, and total costs, based on the order's position in the list
     public void applyDiscounts(List<Order> sortedOrders) {
-        int discountStep = 5;
-        int startDiscount = 50;
-        int pricePerKg = 100;
+        int discountStep = 5; // Discount decrement
+        int startDiscount = 50; // Max. dicsount
+        int pricePerKg = 100; // Cost for 1 kg of Cement in USD
 
         for (int queue = 0; queue < sortedOrders.size(); queue++) {
             Order order = sortedOrders.get(queue);
@@ -31,16 +31,17 @@ public class OrdersProcessor {
                 order.setDiscount(startDiscount - discountMinus);
             }
 
-            order.setOrderPice(order.getQuantity() * pricePerKg * (1 - order.getDiscount()/100));
+            order.setOrderPice((int) (order.getQuantity() * pricePerKg * (1 - order.getDiscount() / 100.0)));
 
         }
     }
 
+    //Maps the orders, excluding duplicates while adding their total order price1
     public Map<String, Integer> mapTheOrders(List<Order> sortedOrders) {
         return sortedOrders.stream()
                 .collect(Collectors.groupingBy(
-                        order -> order.companyName,
-                        Collectors.summingInt(order -> order.orderPrice)
+                        order -> order.getCompanyName(),
+                        Collectors.summingInt(order -> order.getOrderPrice())
                 ));
     }
 

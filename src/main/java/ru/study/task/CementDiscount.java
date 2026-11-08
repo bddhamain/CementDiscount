@@ -9,7 +9,7 @@ public class CementDiscount {
 
     public static void main(String[] args) {
         Path file = Path.of("discount_day_without_ext");
-        OrderSource source = new JsonOrderSourceAdapter(file);
+        OrderSource source = new NoExtOrderSourceAdapter(file);
 
         List<Order> orders = source.read();
 

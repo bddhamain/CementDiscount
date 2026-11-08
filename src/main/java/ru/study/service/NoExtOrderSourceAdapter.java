@@ -7,13 +7,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.time.LocalDateTime;
 
-public class JsonOrderSourceAdapter implements OrderSource {
+public class NoExtOrderSourceAdapter implements OrderSource {
 
-    private final JsonOrderReader reader;
+    private final NoExtOrderReader reader;
 
     // 1. The constructor to pass the file
-    public JsonOrderSourceAdapter(Path file) {
-        this.reader = new JsonOrderReader(file);
+    public NoExtOrderSourceAdapter(Path file) {
+        this.reader = new NoExtOrderReader(file);
     }
 
     @Override
@@ -35,7 +35,7 @@ public class JsonOrderSourceAdapter implements OrderSource {
             }
         } catch (IOException e) {
             // 5. Handle the checked exception from the reader
-            throw new UncheckedIOException("Failed to read JSON file", e);
+            throw new UncheckedIOException("Failed to read file", e);
         }
 
         return orders;

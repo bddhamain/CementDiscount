@@ -4,11 +4,11 @@ import java.time.LocalDateTime;
 
 public class Order {
     private int queue; // Index order number to calculate a discount
-    public String companyName;
-    public LocalDateTime orderTime;
+    private String companyName;
+    private LocalDateTime orderTime;
     private int quantity; // Order quantity
     private int discount; // Order discount
-    public int orderPrice; // Order price with discount
+    private int orderPrice; // Order price with discount
 
     // 2. Full constructor
     public Order(int queue, String companyName, LocalDateTime orderTime, int quantity, int discount, int orderPrice) {

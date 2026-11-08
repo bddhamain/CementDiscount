@@ -35,7 +35,7 @@ public class CsvOrderSourceAdapter implements OrderSource {
         } catch (IOException e) {
             // 4. Since OrderSource.read() probably doesn't declare 'throws IOException',
             // we wrap it in a RuntimeException (UncheckedIOException is best here).
-            throw new UncheckedIOException("Failed to read CSV file", e);
+            throw new UncheckedIOException("Failed to read file", e);
         }
 
         return orders;
