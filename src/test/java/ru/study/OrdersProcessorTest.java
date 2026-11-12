@@ -7,6 +7,7 @@ import org.junit.jupiter.params.provider.CsvSource;
 import ru.study.service.Order;
 import ru.study.service.OrdersProcessor;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -20,7 +21,7 @@ class OrdersProcessorTest {
 
     @BeforeEach
     void setUp() {
-        processor = new OrdersProcessor();
+        processor = new OrdersProcessor(BigDecimal.valueOf(100), 50, 5);
     }
 
     /** Build an Order via the full constructor (queue/discount/price filled later). */
@@ -33,6 +34,12 @@ class OrdersProcessorTest {
                 0,
                 0
         );
+    }
+
+    // Helper function for BigDecimal assertion (I'm starting to go insane)
+    public static void assertBD(int expected, BigDecimal actual) {
+        assertEquals(0, actual.compareTo(BigDecimal.valueOf(expected)),
+                () -> "expected " + expected + " but was " + actual);
     }
 
     // ==================================================================
@@ -79,7 +86,7 @@ class OrdersProcessorTest {
 
         processor.applyDiscounts(orders);
 
-        assertEquals(expected, orders.get(queue).getDiscount());
+        assertBD(expected, orders.get(queue).getDiscount());
     }
 
     @Test
@@ -93,7 +100,7 @@ class OrdersProcessorTest {
         processor.applyDiscounts(orders);
 
         for (int i = 0; i < orders.size(); i++) {
-            assertEquals(i, orders.get(i).getQueue());
+            assertBD(i, orders.get(i).getQueue());
         }
     }
 
@@ -121,7 +128,7 @@ class OrdersProcessorTest {
 
         processor.applyDiscounts(orders);
 
-        assertEquals(expectedPrice, orders.get(queue).getOrderPrice());
+        assertBD(expectedPrice, orders.get(queue).getOrderPrice());
     }
 
     // ==================================================================
@@ -137,11 +144,11 @@ class OrdersProcessorTest {
                 order("Beta", 3, 3))); // queue 2, 40% off -> 180
 
         processor.applyDiscounts(orders);
-        Map<String, Integer> map = processor.mapTheOrders(orders);
+        Map<String, BigDecimal> map = processor.mapTheOrders(orders);
 
         assertEquals(2, map.size());
-        assertEquals(160, map.get("Acme"));   // 50 + 110
-        assertEquals(180, map.get("Beta"));
+        assertBD(160, map.get("Acme"));   // 50 + 110
+        assertBD(180, map.get("Beta"));
     }
 
     @Test
@@ -164,22 +171,22 @@ class OrdersProcessorTest {
         List<Order> sorted = processor.process(
                 new ArrayList<>(List.of(acmeLate, betaEarly, acmeMid)));
         processor.applyDiscounts(sorted);
-        Map<String, Integer> map = processor.mapTheOrders(sorted);
+        Map<String, BigDecimal> map = processor.mapTheOrders(sorted);
 
         // Queue positions follow the sorted order.
-        assertEquals(0, betaEarly.getQueue());
-        assertEquals(1, acmeMid.getQueue());
-        assertEquals(2, acmeLate.getQueue());
+        assertBD(0, betaEarly.getQueue());
+        assertBD(1, acmeMid.getQueue());
+        assertBD(2, acmeLate.getQueue());
 
         // Prices:
         //   betaEarly: 2*100*0.50 = 100
         //   acmeMid  : 3*100*0.55 = 165
         //   acmeLate : 1*100*0.60 =  60
-        assertEquals(100, betaEarly.getOrderPrice());
-        assertEquals(165, acmeMid.getOrderPrice());
-        assertEquals(60,  acmeLate.getOrderPrice());
+        assertBD(100, betaEarly.getOrderPrice());
+        assertBD(165, acmeMid.getOrderPrice());
+        assertBD(60,  acmeLate.getOrderPrice());
 
-        assertEquals(225, map.get("Acme"));   // 165 + 60
-        assertEquals(100, map.get("Beta"));
+        assertBD(225, map.get("Acme"));   // 165 + 60
+        assertBD(100, map.get("Beta"));
     }
 }

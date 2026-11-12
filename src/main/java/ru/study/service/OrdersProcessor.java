@@ -1,5 +1,7 @@
 package ru.study.service;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -7,42 +9,59 @@ import java.util.stream.Collectors;
 
 public class OrdersProcessor {
 
-    //Sorts orders by orderTime (earliest first)
-    public List<Order> process(List<Order> orders) {
-        return orders.stream()
-                .sorted(Comparator.comparing(order -> order.getOrderTime()))
-                .toList();
-    }
+    // Added discount parameters constructor into a OrderProcessor
+    private final BigDecimal pricePerKg;
+    private final int startDiscount;
+    private final int discountStep;
 
-    // Assigns queue positions, discounts, and total costs, based on the order's position in the list
-    public void applyDiscounts(List<Order> sortedOrders) {
-        int discountStep = 5; // Discount decrement
-        int startDiscount = 50; // Max. dicsount
-        int pricePerKg = 100; // Cost for 1 kg of Cement in USD
-
-        for (int queue = 0; queue < sortedOrders.size(); queue++) {
-            Order order = sortedOrders.get(queue);
-            order.setQueue(queue);
-
-            int discountMinus = queue * discountStep;
-            if (discountMinus > startDiscount) {
-                order.setDiscount(0);
-            } else {
-                order.setDiscount(startDiscount - discountMinus);
-            }
-
-            order.setOrderPice((int) (order.getQuantity() * pricePerKg * (1 - order.getDiscount() / 100.0)));
-
+        public OrdersProcessor(BigDecimal pricePerKg, int startDiscount, int discountStep) {
+            this.pricePerKg = pricePerKg;
+            this.startDiscount = startDiscount;
+            this.discountStep = discountStep;
         }
-    }
 
-    //Maps the orders, excluding duplicates while adding their total order price1
-    public Map<String, Integer> mapTheOrders(List<Order> sortedOrders) {
+        public List<Order> process(List<Order> orders) {
+            return orders.stream()
+                    .sorted(Comparator.comparing(Order::getOrderTime))
+                    .toList();
+        }
+
+        public void applyDiscounts(List<Order> sortedOrders) {
+            BigDecimal hundred = BigDecimal.valueOf(100);
+
+            for (int queue = 0; queue < sortedOrders.size(); queue++) {
+                Order order = sortedOrders.get(queue);
+                order.setQueue(BigDecimal.valueOf(queue));
+
+                int discountMinus = queue * discountStep;
+                int discountValue = (discountMinus > startDiscount)
+                        ? 0
+                        : startDiscount - discountMinus;
+                order.setDiscount(BigDecimal.valueOf(discountValue));
+
+                BigDecimal discountFraction = BigDecimal.valueOf(discountValue)
+                        .divide(hundred, 4, RoundingMode.HALF_UP);
+                BigDecimal multiplier = BigDecimal.ONE.subtract(discountFraction);
+
+                BigDecimal total = order.getQuantity()
+                        .multiply(pricePerKg)
+                        .multiply(multiplier)
+                        .setScale(2, RoundingMode.HALF_UP);
+
+                order.setOrderPrice(total);
+            }
+        }
+
+    // Maps the orders, excluding duplicates while adding their total order price
+    public Map<String, BigDecimal> mapTheOrders(List<Order> sortedOrders) {
         return sortedOrders.stream()
                 .collect(Collectors.groupingBy(
-                        order -> order.getCompanyName(),
-                        Collectors.summingInt(order -> order.getOrderPrice())
+                        Order::getCompanyName,
+                        Collectors.reducing(
+                                BigDecimal.ZERO,
+                                Order::getOrderPrice,
+                                BigDecimal::add
+                        )
                 ));
     }
-
 }

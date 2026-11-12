@@ -16,6 +16,7 @@ import ru.study.service.NoExtOrderSourceAdapter;
 import ru.study.service.Order;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static ru.study.OrdersProcessorTest.assertBD;
 
 class NoExtOrderSourceAdapterTest {
 
@@ -41,11 +42,11 @@ class NoExtOrderSourceAdapterTest {
         assertEquals(3, orders.size());
         assertEquals("Acme", orders.get(0).getCompanyName());
         assertEquals(LocalDateTime.of(2024, 1, 1, 10, 0), orders.get(0).getOrderTime());
-        assertEquals(5, orders.get(0).getQuantity());
+        assertBD(5, orders.get(0).getQuantity());
         assertEquals("Beta", orders.get(1).getCompanyName());
-        assertEquals(7, orders.get(1).getQuantity());
+        assertBD(7, orders.get(1).getQuantity());
         assertEquals("Acme", orders.get(2).getCompanyName());
-        assertEquals(2, orders.get(2).getQuantity());
+        assertBD(2, orders.get(2).getQuantity());
     }
 
     @Test
@@ -55,9 +56,9 @@ class NoExtOrderSourceAdapterTest {
 
         Order o = new NoExtOrderSourceAdapter(file).read().get(0);
 
-        assertEquals(0, o.getQueue());
-        assertEquals(0, o.getDiscount());
-        assertEquals(0, o.getOrderPrice());
+        assertBD(0, o.getQueue());
+        assertBD(0, o.getDiscount());
+        assertBD(0, o.getOrderPrice());
     }
 
     @Test
@@ -68,7 +69,7 @@ class NoExtOrderSourceAdapterTest {
         Order o = new NoExtOrderSourceAdapter(file).read().get(0);
 
         assertEquals("Acme", o.getCompanyName());
-        assertEquals(5, o.getQuantity());
+        assertBD(5, o.getQuantity());
         assertEquals(LocalDateTime.of(2024, 1, 1, 10, 0), o.getOrderTime());
     }
 
@@ -81,29 +82,29 @@ class NoExtOrderSourceAdapterTest {
     }
 
     @Test
-    @DisplayName("invalid date propagates DateTimeParseException")
+    @DisplayName("invalid date propagates IllegalArgumentException")
     void invalidDate() throws IOException {
         Path file = writeFile("not-a-date#Acme#5\n");
 
-        assertThrows(DateTimeParseException.class,
+        assertThrows(IllegalArgumentException.class,
                 () -> new NoExtOrderSourceAdapter(file).read());
     }
 
     @Test
-    @DisplayName("invalid quantity propagates NumberFormatException")
+    @DisplayName("invalid quantity propagates IllegalArgumentException")
     void invalidQuantity() throws IOException {
         Path file = writeFile("2024-01-01T10:00#Acme#five\n");
 
-        assertThrows(NumberFormatException.class,
+        assertThrows(IllegalArgumentException.class,
                 () -> new NoExtOrderSourceAdapter(file).read());
     }
 
     @Test
-    @DisplayName("missing fields throws ArrayIndexOutOfBoundsException")
+    @DisplayName("missing fields throws IllegalArgumentException")
     void missingFields() throws IOException {
         Path file = writeFile("2024-01-01T10:00#Acme\n");
 
-        assertThrows(ArrayIndexOutOfBoundsException.class,
+        assertThrows(IllegalArgumentException.class,
                 () -> new NoExtOrderSourceAdapter(file).read());
     }
 

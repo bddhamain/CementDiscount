@@ -1,43 +1,29 @@
 package ru.study.service;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import lombok.Getter;
+import lombok.Setter;
 
+@Getter @Setter
 public class Order {
-    private int queue; // Index order number to calculate a discount
+
+    private BigDecimal queue;
     private String companyName;
     private LocalDateTime orderTime;
-    private int quantity; // Order quantity
-    private int discount; // Order discount
-    private int orderPrice; // Order price with discount
+    private BigDecimal quantity;
+    private BigDecimal discount;
+    private BigDecimal orderPrice;
 
-    // 2. Full constructor
-    public Order(int queue, String companyName, LocalDateTime orderTime, int quantity, int discount, int orderPrice) {
-        this.queue = queue;
+    public Order(int queue, String companyName, LocalDateTime orderTime,
+                 int quantity, int discount, double orderPrice) {
+        this.queue       = BigDecimal.valueOf(queue);
         this.companyName = companyName;
-        this.orderTime = orderTime;
-        this.quantity = quantity;
-        this.discount = discount;
-        this.orderPrice = orderPrice;
+        this.orderTime   = orderTime;
+        this.quantity    = BigDecimal.valueOf(quantity);
+        this.discount    = BigDecimal.valueOf(discount);
+        this.orderPrice  = BigDecimal.valueOf(orderPrice);
     }
-
-    // 3. Getters and Setters
-    public int getQueue() { return queue; }
-    public void setQueue(int queue) { this.queue = queue; }
-
-    public String getCompanyName() { return companyName; }
-    public void setCompanyName(String companyName) { this.companyName = companyName; }
-
-    public LocalDateTime getOrderTime() { return orderTime; }
-    public void setOrderTime(LocalDateTime orderTime) { this.orderTime = orderTime; }
-
-    public int getQuantity() { return quantity; }
-    public void setQuantity(int quantity) { this.quantity = quantity; }
-
-    public int getDiscount() { return discount; }
-    public void setDiscount(int discount) { this.discount = discount; }
-
-    public int getOrderPrice() { return orderPrice; }
-    public void setOrderPice(int orderPrice) { this.orderPrice = orderPrice; }
 
     // 4. toString()
     @Override
