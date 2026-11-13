@@ -47,7 +47,7 @@ public class CementDiscount {
         // Save final list to file
         List<String> lines = new ArrayList<>();
         finalOrderList.forEach((company, price) ->
-                lines.add(company + ": " + price + "$"));
+                lines.add(company + " - " + price));
 
         try {
             Files.write(output, lines);
